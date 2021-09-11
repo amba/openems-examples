@@ -11,8 +11,6 @@
 %
 % (C) 2011-2015 Thorsten Liebig <thorsten.liebig@gmx.de>
 
-argv
-typeinfo(argv)
 analysis_only = 0;
 
 pkg load openems;
