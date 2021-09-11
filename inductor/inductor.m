@@ -47,7 +47,7 @@ FDTD = SetBoundaryCond( FDTD, BC );
 
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CSX = InitCSX();
-resolution = wire_radius/3;
+resolution = wire_radius;
 
 mesh.x = SmoothMeshLines( [-MSL_length  MSL_length], resolution);
 mesh.y = SmoothMeshLines( [-15*MSL_width 15*MSL_width], resolution);
