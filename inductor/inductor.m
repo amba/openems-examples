@@ -11,6 +11,10 @@
 %
 % (C) 2011-2015 Thorsten Liebig <thorsten.liebig@gmx.de>
 
+argv
+typeinfo(argv)
+analysis_only = 0;
+
 pkg load openems;
 pkg load csxcad;
 
@@ -24,7 +28,7 @@ substrate_thickness = 254;
 substrate_epr = 3.66;
 
 
-f_max = 7e9;
+f_max = 2e9;
 
 
 %% coil properties
@@ -45,13 +49,11 @@ FDTD = SetBoundaryCond( FDTD, BC );
 
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CSX = InitCSX();
-resolution = c0/(f_max*sqrt(substrate_epr))/unit /50; % resolution of lambda/50
+resolution = wire_radius/3;
 
-mesh.x = SmoothMeshLines([-1.5*separation, 1.5*separation], resolution/4);
-mesh.x = SmoothMeshLines( [-MSL_length mesh.x MSL_length], resolution);
-
-mesh.y = SmoothMeshLines( [-15*MSL_width 15*MSL_width], resolution/4, 1.3 ,0);
-mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), 2*lead_height], resolution/4 );
+mesh.x = SmoothMeshLines( [-MSL_length  MSL_length], resolution);
+mesh.y = SmoothMeshLines( [-15*MSL_width 15*MSL_width], resolution);
+mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), 2*lead_height], resolution );
 CSX = DefineRectGrid( CSX, unit, mesh );
 
 %% substrate
@@ -107,13 +109,16 @@ CSX = AddWire(CSX, 'PEC', 0, p, wire_radius );
 Sim_Path = 'tmp_notch_filter';
 Sim_CSX = 'msl.xml';
 
-[status, message, messageid] = rmdir( Sim_Path, 's' ); % clear previous directory
+
+if (analysis_only == 0)
+  [status, message, messageid] = rmdir( Sim_Path, 's' ); % clear previous directory
 [status, message, messageid] = mkdir( Sim_Path ); % create empty simulation folder
 
-WriteOpenEMS( [Sim_Path '/' Sim_CSX], FDTD, CSX );
-CSXGeomPlot( [Sim_Path '/' Sim_CSX] );
-RunOpenEMS( Sim_Path, Sim_CSX );
-
+  WriteOpenEMS( [Sim_Path '/' Sim_CSX], FDTD, CSX );
+  CSXGeomPlot( [Sim_Path '/' Sim_CSX] );
+  RunOpenEMS( Sim_Path, Sim_CSX );
+endif
+ 
 %% post-processing
 close all
 f = linspace( 1e6, f_max, 1601 );
