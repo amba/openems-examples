@@ -42,12 +42,12 @@ coil_res = 100
 %% setup FDTD parameters & excitation function %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 FDTD = InitFDTD();
 FDTD = SetGaussExcite( FDTD, f_max/2, f_max/2 );
-BC   = {'PML_8' 'PML_8' 'MUR' 'MUR' 'PEC' 'MUR'};
+BC   = {'PML_8' 'PML_8' 'PML_8' 'PML_8' 'PEC' 'PML_8'};
 FDTD = SetBoundaryCond( FDTD, BC );
 
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CSX = InitCSX();
-resolution = wire_radius;
+resolution = 2*wire_radius;
 
 mesh.x = SmoothMeshLines( [-MSL_length  MSL_length], resolution);
 mesh.y = SmoothMeshLines( [-15*MSL_width 15*MSL_width], resolution);
