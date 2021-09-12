@@ -7,7 +7,7 @@ pkg load csxcad;
 %% setup the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 feed_length=10;
 wire_rad = sqrt(1.4/pi);
-mesh_size = wire_rad;
+mesh_size = wire_rad/2;
 coil_rad = 10;
 coil_length = 50;
 coil_turns = 8;
@@ -15,8 +15,8 @@ coil_res = 10;
 port_length = mesh_size; %coil_length/2;
 port_resist = 1000;
 
-f_max = 100e6;
-f_excite = 300e6;
+#f_max = 100e6;
+f_excite = 500e6;
 
 %% define openEMS options %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 openEMS_opts = '';
@@ -34,9 +34,9 @@ Sim_CSX = 'helix.xml';
 [status,message,messageid] = mkdir(Sim_Path);
 
 %% setup FDTD parameter & excitation function %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-FDTD = InitFDTD(30000,1e-6);
+FDTD = InitFDTD('NrTS', 30000, 'EndCriteria', 1e-06);
 FDTD = SetGaussExcite(FDTD,f_excite/2,f_excite/2);
-BC = [1 1 1 1 1 1];
+BC = [1 1 1 1 1 1]; % all PMC
 FDTD = SetBoundaryCond(FDTD,BC);
 
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -133,24 +133,12 @@ Z = U.FD{1}.val./I.FD{1}.val;
 f = U.FD{1}.f;
 L = imag(Z)./(f*2*pi);
 R = real(Z);
-ind = find(f<f_max);
-
-subplot(2,1,1);
-plot(f(ind)*1e-6,L(ind)*1e9,'Linewidth',2);
-xlabel('frequency (MHz)');
-ylabel('coil inductance (nH)');
-grid on;
-subplot(2,1,2);
-plot(f(ind)*1e-6,R(ind),'Linewidth',2);
-hold on
-plot(f(ind)*1e-6,imag(Z(ind)),'r','Linewidth',2);
-xlabel('frequency (MHz)');
-ylabel('resistance (Ohm)');
-grid on;
-legend( {'real','imaginary'}, 'location', 'northwest' )
+#ind = find(f<f_max);
 
 figure
-plot(U.TD{1}.t/1e-6,U.TD{1}.val,'Linewidth',2);
-xlabel('time (us)');
-ylabel('amplitude (V)');
+plot(f*1e-6,abs(Z),'Linewidth',2);
+xlabel('f (MHz)');
+ylabel('|Z|');
 grid on;
+
+
