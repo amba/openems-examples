@@ -108,7 +108,6 @@ CSX = AddWire(CSX, 'PEC', 0, p, wire_radius );
 
 
 %% write/show/run the openEMS compatible xml-file
-Sim_Path = 'tmp_notch_filter';
 Sim_CSX = 'msl.xml';
 
 
