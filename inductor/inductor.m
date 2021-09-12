@@ -1,20 +1,18 @@
 #!/usr/bin/env -S octave --persist
-                %
-% Tutorials / MSL_NotchFilter
-%
-% Describtion at:
-% http://openems.de/index.php/Tutorial:_Microstrip_Notch_Filter
-%
-% Tested with
-%  - Matlab 2011a / Octave 4.0
-%  - openEMS v0.0.33
-%
-% (C) 2011-2015 Thorsten Liebig <thorsten.liebig@gmx.de>
-
-analysis_only = 0;
 
 pkg load openems;
 pkg load csxcad;
+
+
+if (!isempty(argv))
+  Sim_Path = argv{1}
+  analysis_only = 1;
+else
+  analysis_only = 0;
+  Sim_Path = datestr(clock(), 'dd-mm-yyyy_HH:MM:SS')
+endif
+
+
 
 
 %% setup the simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -47,11 +45,17 @@ FDTD = SetBoundaryCond( FDTD, BC );
 
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CSX = InitCSX();
-resolution = 2*wire_radius;
+resolution = c0/(f_max*sqrt(substrate_epr))/unit /50
+fine_resolution = 2* wire_radius/3;
 
-mesh.x = SmoothMeshLines( [-MSL_length  MSL_length], resolution);
-mesh.y = SmoothMeshLines( [-15*MSL_width 15*MSL_width], resolution);
-mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), 2*lead_height], resolution );
+increase_max = 1.3
+mesh.x = SmoothMeshLines([-separation/2, separation/2], fine_resolution);
+mesh.x = SmoothMeshLines( [-MSL_length, mesh.x, MSL_length], resolution);
+
+mesh.y = SmoothMeshLines([-loop_radius, loop_radius], fine_resolution);
+mesh.y = SmoothMeshLines( [-15*MSL_width, mesh.y, 15*MSL_width], resolution);
+mesh.z = SmoothMeshLines([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], fine_resolution);
+mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
 CSX = DefineRectGrid( CSX, unit, mesh );
 
 %% substrate
