@@ -9,7 +9,7 @@ if (!isempty(argv))
   analysis_only = 1;
 else
   analysis_only = 0;
-  Sim_Path = datestr(clock(), 'dd-mm-yyyy_HH:MM:SS')
+  Sim_Path = datestr(clock(), 'yyyy-mm-ss_HH:MM:SS')
 endif
 
 
@@ -29,11 +29,13 @@ f_max = 2e9;
 
 %% coil properties
 separation = 10e3
-wire_radius = 100
+## wire_radius = 100
 num_loops = 10
 loop_radius = 3e3
 lead_height = 3 * loop_radius
 coil_res = 100
+coil_mesh_res = loop_radius / 10
+
 
 
 
@@ -46,16 +48,15 @@ FDTD = SetBoundaryCond( FDTD, BC );
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CSX = InitCSX();
 resolution = c0/(f_max*sqrt(substrate_epr))/unit /50
-fine_resolution = wire_radius;
 
 increase_max = 1.3
-mesh.x = SmoothMeshLines2([-separation/2, separation/2], fine_resolution);
-mesh.x = SmoothMeshLines2( [-MSL_length, mesh.x, MSL_length], resolution);
+mesh.x = SmoothMeshLines([-separation/2, separation/2], coil_mesh_res);
+mesh.x = SmoothMeshLines( [-MSL_length, mesh.x, MSL_length], resolution);
 
-mesh.y = SmoothMeshLines2([-loop_radius, loop_radius], fine_resolution);
-mesh.y = SmoothMeshLines2( [-15*MSL_width, mesh.y, 15*MSL_width], resolution);
-mesh.z = SmoothMeshLines2([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], fine_resolution);
-mesh.z = SmoothMeshLines2( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
+mesh.y = SmoothMeshLines([-loop_radius, loop_radius], coil_mesh_res);
+mesh.y = SmoothMeshLines( [-15*MSL_width, mesh.y, 15*MSL_width], resolution);
+mesh.z = SmoothMeshLines([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], coil_mesh_res);
+mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
 CSX = DefineRectGrid( CSX, unit, mesh );
 
 %% substrate
@@ -68,11 +69,11 @@ CSX = AddBox( CSX, 'RO4350B', 0, start, stop );
 %% MSL port
 CSX = AddMetal( CSX, 'PEC' );
 portstart = [ mesh.x(1), -MSL_width/2, substrate_thickness];
-portstop  = [ -separation/2+4*wire_radius,  MSL_width/2, 0];
-[CSX,port{1}] = AddMSLPort( CSX, 999, 1, 'PEC', portstart, portstop, 0, [0 0 -1], 'ExcitePort', true, 'FeedShift', 10*resolution, 'MeasPlaneShift',  MSL_length/3);
+portstop  = [ -separation/2,  MSL_width/2, 0];
+[CSX,port{1}] = AddMSLPort(CSX, 999, 1, 'PEC', portstart, portstop, 0, [0 0 -1], 'ExcitePort', true, 'FeedShift', 10*resolution, 'MeasPlaneShift',  MSL_length/3);
 
 portstart = [mesh.x(end), -MSL_width/2, substrate_thickness];
-portstop  = [separation/2-4*wire_radius         ,  MSL_width/2, 0];
+portstop  = [separation/2 ,  MSL_width/2, 0];
 [CSX,port{2}] = AddMSLPort( CSX, 999, 2, 'PEC', portstart, portstop, 0, [0 0 -1], 'MeasPlaneShift',  MSL_length/3 );
 
 %% wire coil
@@ -100,21 +101,19 @@ end
 ## p(1,count) = separation/2;
 ## p(2,count) = 0;
 ## p(3,count) = substrate_thickness + lead_height;
-count = count+1
+count = count+1;
 p(1,count) = separation/2;
 p(2,count) = 0;
 p(3,count) = substrate_thickness;
-CSX = AddWire(CSX, 'PEC', 0, p, wire_radius );
-
+CSX = AddCurve(CSX, 'PEC', 0, p);
 
 %% write/show/run the openEMS compatible xml-file
 Sim_CSX = 'msl.xml';
 
 
 if (analysis_only == 0)
-  [status, message, messageid] = rmdir( Sim_Path, 's' ); % clear previous directory
-[status, message, messageid] = mkdir( Sim_Path ); % create empty simulation folder
-
+  %% create empty simulation folder
+  [status, message, messageid] = mkdir( Sim_Path );
   WriteOpenEMS( [Sim_Path '/' Sim_CSX], FDTD, CSX );
   CSXGeomPlot( [Sim_Path '/' Sim_CSX] );
   RunOpenEMS( Sim_Path, Sim_CSX );
