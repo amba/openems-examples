@@ -33,8 +33,8 @@ separation = 10e3
 num_loops = 10
 loop_radius = 3e3
 lead_height = 3 * loop_radius
-coil_res = 100
-coil_mesh_res = loop_radius / 10
+coil_res = 20
+coil_mesh_res = loop_radius / 20
 
 
 
@@ -49,12 +49,11 @@ FDTD = SetBoundaryCond( FDTD, BC );
 CSX = InitCSX();
 resolution = c0/(f_max*sqrt(substrate_epr))/unit /50
 
-increase_max = 1.3
 mesh.x = SmoothMeshLines([-separation/2, separation/2], coil_mesh_res);
 mesh.x = SmoothMeshLines( [-MSL_length, mesh.x, MSL_length], resolution);
 
-mesh.y = SmoothMeshLines([-loop_radius, loop_radius], coil_mesh_res);
-mesh.y = SmoothMeshLines( [-15*MSL_width, mesh.y, 15*MSL_width], resolution);
+mesh.y = SmoothMeshLines( [0, MSL_width-coil_mesh_res/3, MSL_width+2*coil_mesh_res/3, loop_radius], coil_mesh_res, 1.5);
+mesh.y = SmoothMeshLines( [-15*MSL_width, -mesh.y, mesh.y, 15*MSL_width], resolution);
 mesh.z = SmoothMeshLines([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], coil_mesh_res);
 mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
 CSX = DefineRectGrid( CSX, unit, mesh );
@@ -82,10 +81,6 @@ p(1,1) = -separation/2;
 p(2,1) = 0;
 p(3,1) = substrate_thickness;
 
-## p(1,2) = -separation/2;
-## p(2,2) = 0;
-## p(3,2) = substrate_thickness + lead_height;
-
 dt = 1.0 / coil_res;
 
 count = 1;
@@ -97,10 +92,7 @@ for n=0:num_loops-1
       p(3,count) = substrate_thickness + lead_height + loop_radius * sin(2*pi*dt*m);
     end
 end
-## count = count+1
-## p(1,count) = separation/2;
-## p(2,count) = 0;
-## p(3,count) = substrate_thickness + lead_height;
+
 count = count+1;
 p(1,count) = separation/2;
 p(2,count) = 0;
