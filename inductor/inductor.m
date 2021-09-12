@@ -53,8 +53,8 @@ mesh.x = SmoothMeshLines([-separation/2, separation/2], coil_mesh_res);
 mesh.x = SmoothMeshLines( [-MSL_length, mesh.x, MSL_length], resolution);
 
 mesh.y = SmoothMeshLines( [0, MSL_width-coil_mesh_res/3, MSL_width+2*coil_mesh_res/3, loop_radius], coil_mesh_res, 1.5);
-mesh.y = SmoothMeshLines( [-15*MSL_width, -mesh.y, mesh.y, 15*MSL_width], resolution);
-mesh.z = SmoothMeshLines([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], coil_mesh_res);
+mesh.y = SmoothMeshLines( [-5*loop_radius, -mesh.y, mesh.y, 5*loop_radius], resolution);
+mesh.z = SmoothMeshLines([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + 5*loop_radius], coil_mesh_res);
 mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
 CSX = DefineRectGrid( CSX, unit, mesh );
 
