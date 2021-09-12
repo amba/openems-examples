@@ -46,16 +46,16 @@ FDTD = SetBoundaryCond( FDTD, BC );
 %% setup CSXCAD geometry & mesh %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 CSX = InitCSX();
 resolution = c0/(f_max*sqrt(substrate_epr))/unit /50
-fine_resolution = 2* wire_radius/3;
+fine_resolution = wire_radius;
 
 increase_max = 1.3
-mesh.x = SmoothMeshLines([-separation/2, separation/2], fine_resolution);
-mesh.x = SmoothMeshLines( [-MSL_length, mesh.x, MSL_length], resolution);
+mesh.x = SmoothMeshLines2([-separation/2, separation/2], fine_resolution);
+mesh.x = SmoothMeshLines2( [-MSL_length, mesh.x, MSL_length], resolution);
 
-mesh.y = SmoothMeshLines([-loop_radius, loop_radius], fine_resolution);
-mesh.y = SmoothMeshLines( [-15*MSL_width, mesh.y, 15*MSL_width], resolution);
-mesh.z = SmoothMeshLines([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], fine_resolution);
-mesh.z = SmoothMeshLines( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
+mesh.y = SmoothMeshLines2([-loop_radius, loop_radius], fine_resolution);
+mesh.y = SmoothMeshLines2( [-15*MSL_width, mesh.y, 15*MSL_width], resolution);
+mesh.z = SmoothMeshLines2([substrate_thickness + lead_height - loop_radius, substrate_thickness + lead_height + loop_radius], fine_resolution);
+mesh.z = SmoothMeshLines2( [linspace(0,substrate_thickness,5), mesh.z, 2*lead_height], resolution);
 CSX = DefineRectGrid( CSX, unit, mesh );
 
 %% substrate
