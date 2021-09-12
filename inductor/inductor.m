@@ -9,7 +9,7 @@ if (!isempty(argv))
   analysis_only = 1;
 else
   analysis_only = 0;
-  Sim_Path = datestr(clock(), 'yyyy-mm-ss_HH:MM:SS')
+  Sim_Path = datestr(clock(), 'yyyy-mm-dd_HH:MM:SS')
 endif
 
 
